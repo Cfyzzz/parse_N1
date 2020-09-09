@@ -62,6 +62,14 @@ def parse_page(url):
             floor, floors = parse_floor(floor.text)
             price = parse_float_value(price.text)
             sqm = parse_float_value(sqm.text)
+
+            identical_float = list(
+                Apartments.select().where((Apartments.city == city.text) & (Apartments.addr == addr.text))
+            )
+            if len(identical_float) > 0:
+                print(f"Поропустим {city.text}, {addr.text}")
+                continue
+
             row = Apartments(
                 city=city.text,
                 district=district.text,
