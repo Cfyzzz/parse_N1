@@ -42,6 +42,14 @@ def parse_float_value(line, default=0):
     return float(result[0])
 
 
+def parse_addr(line):
+    rooms = line[:line.find(",")]
+    addr = line[line.find(","):]
+    rooms = int("".join((re.findall(r'\d+', rooms))))
+    addr = addr.strip()
+    return rooms, addr
+
+
 def parse_page(url):
     response = requests.get(url)
     if response.status_code == 200:
@@ -58,38 +66,44 @@ def parse_page(url):
             price = _parse_item(item, 'div', {'class': 'living-list-card-price__item _object'})
             sqm = _parse_item(item, 'div', {'class': 'living-list-card-price__item _per-sqm'})
 
+            rooms, addr = parse_addr(addr.text)
+
             area = parse_float_value(area.text)
             floor, floors = parse_floor(floor.text)
             price = parse_float_value(price.text)
             sqm = parse_float_value(sqm.text)
 
             identical_float = list(
-                Apartments.select().where((Apartments.city == city.text) & (Apartments.addr == addr.text))
+                Apartments.select().where((Apartments.city == city.text)
+                                          & (Apartments.addr == addr)
+                                          & (Apartments.floor == floor)
+                                          & (Apartments.rooms == rooms))
             )
             if len(identical_float) > 0:
-                print(f"Поропустим {city.text}, {addr.text}")
+                print(f"Поропустим {city.text}, {addr}")
                 continue
 
             row = Apartments(
                 city=city.text,
                 district=district.text,
-                addr=addr.text,
+                addr=addr,
                 area=area,
                 floor=floor,
                 floors=floors,
                 material=material.text,
                 price=price,
-                sqm=sqm
+                sqm=sqm,
+                rooms=rooms
             )
             row.save()
-            print(", ".join([city.text, district.text, addr.text]))
+            print(", ".join(map(str, [city.text, district.text, addr, rooms])))
             print(", ".join(map(str, [area, floor, material.text, price, sqm])))
 
         return bool(items)
     return False
 
 
-base_url = "https://kopeysk.n1.ru/kupit/kvartiry/"
+base_url = "https://chelyabinsk.n1.ru/kupit/kvartiry/"
 is_page = True
 param = ""
 index_page = 1
