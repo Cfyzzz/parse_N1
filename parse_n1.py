@@ -96,8 +96,8 @@ def parse_page(url):
                 rooms=rooms
             )
             row.save()
-            print(", ".join(map(str, [city.text, district.text, addr, rooms])))
-            print(", ".join(map(str, [area, floor, material.text, price, sqm])))
+            print(", ".join(map(str, [city.text, district.text, addr, f"{rooms} комнат"])))
+            print(", ".join(map(str, [area, f"{floor} этаж из {floors}", material.text, price, sqm])))
 
         return bool(items)
     return False
@@ -111,5 +111,5 @@ while is_page:
     print(f"PAGE: {index_page}")
     is_page = parse_page(url=base_url + param)
     index_page += 1
-    param = "?page=" + str(index_page)
+    param = f"?page={index_page}"
 
