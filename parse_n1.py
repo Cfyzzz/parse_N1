@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import re
 
 from models import Apartments
 
@@ -7,7 +8,7 @@ from models import Apartments
 class NoneObject:
 
     def __init__(self):
-        text = "Не указано"
+        self.text = "Не указано"
 
 
 def _parse_item(item, *params):
@@ -15,6 +16,30 @@ def _parse_item(item, *params):
     if result is None:
         return NoneObject()
     return result
+
+
+def parse_floor(line):
+    """Парсит строку вида '2 / 4 этажи' в отельные перменные
+
+    :param line: входная строка
+    :return (floor, floors): этаж, этажность дома
+    """
+    try:
+        _line = line.replace(" ", "")
+        floor, floors = _line.split("/")
+        floor = int("".join((re.findall(r'\d+', floor))))
+        floors = int("".join((re.findall(r'\d+', floors))))
+    except Exception:
+        return 0, 0
+    return floor, floors
+
+
+def parse_float_value(line, default=0):
+    _line = line.replace(" ", "")
+    result = re.findall(r'\d*\.\d+|\d+', _line)
+    if not result:
+        return default
+    return float(result[0])
 
 
 def parse_page(url):
@@ -32,21 +57,27 @@ def parse_page(url):
             material = _parse_item(item, 'div', {'class': 'living-list-card__material'})
             price = _parse_item(item, 'div', {'class': 'living-list-card-price__item _object'})
             sqm = _parse_item(item, 'div', {'class': 'living-list-card-price__item _per-sqm'})
+
+            area = parse_float_value(area.text)
+            floor, floors = parse_floor(floor.text)
+            price = parse_float_value(price.text)
+            sqm = parse_float_value(sqm.text)
+            row = Apartments(
+                city=city.text,
+                district=district.text,
+                addr=addr.text,
+                area=area,
+                floor=floor,
+                floors=floors,
+                material=material.text,
+                price=price,
+                sqm=sqm
+            )
+            row.save()
             print(", ".join([city.text, district.text, addr.text]))
-            print(", ".join([area.text, floor.text, material.text, price.text, sqm.text]))
-            # TODO - Числовые значения спарсить как числа, а не текст
-            # row = Apartments(
-            #     city=city,
-            #     district=district,
-            #     addr=addr,
-            #     area=area,
-            #     floor=floor,
-            #     material=material,
-            #     price=price,
-            #     sqm=sqm
-            # )
-            # row.save()
-        return True
+            print(", ".join(map(str, [area, floor, material.text, price, sqm])))
+
+        return bool(items)
     return False
 
 
@@ -58,5 +89,5 @@ while is_page:
     print(f"PAGE: {index_page}")
     is_page = parse_page(url=base_url + param)
     index_page += 1
-    param = "?" + str(index_page)
+    param = "?page=" + str(index_page)
 

@@ -17,6 +17,7 @@ class Apartments(BaseTable):
     addr = peewee.CharField(verbose_name="Адрес")
     area = peewee.FloatField(verbose_name="Площадь")
     floor = peewee.IntegerField(verbose_name="Этаж")
+    number_of_floors = peewee.IntegerField(default=1, verbose_name="Этажей в доме")
     material = peewee.CharField(verbose_name="Матирал")
     price = peewee.FloatField(verbose_name="Цена объекта")
     sqm = peewee.FloatField(verbose_name="Цена кв. метра")
