@@ -46,7 +46,7 @@ def parse_addr(line):
     rooms = line[:line.find(",")]
     addr = line[line.find(","):]
     rooms = int("".join((re.findall(r'\d+', rooms))))
-    addr = addr.strip()
+    addr = addr.lstrip(",").strip()
     return rooms, addr
 
 
@@ -89,7 +89,7 @@ def parse_page(url):
                 addr=addr,
                 area=area,
                 floor=floor,
-                floors=floors,
+                number_of_floors=floors,
                 material=material.text,
                 price=price,
                 sqm=sqm,
@@ -103,7 +103,7 @@ def parse_page(url):
     return False
 
 
-base_url = "https://chelyabinsk.n1.ru/kupit/kvartiry/"
+base_url = "https://kopeysk.n1.ru/kupit/kvartiry/"
 is_page = True
 param = ""
 index_page = 1
