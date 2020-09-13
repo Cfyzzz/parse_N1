@@ -4,6 +4,11 @@ from matplotlib import pyplot
 import statsmodels.api as sm
 
 
+def add_trend_by_x(ax, df, x, y, label="fit"):
+    model = sm.formula.ols(formula=f'{y} ~ {x}', data=df)
+    res = model.fit()
+    df.assign(fit=res.fittedvalues).plot(x=x, y='fit', ax=ax, label=label)
+
 
 set_price = 100000000
 
@@ -16,18 +21,9 @@ print(dataframe.head(5))
 
 fig, ax = pyplot.subplots()
 
-
-model = sm.formula.ols(formula='price ~ area', data=dataframe3)
-res = model.fit()
-dataframe3.assign(fit=res.fittedvalues).plot(x='area', y='fit', ax=ax, label='fit Екатеринбург')
-
-model = sm.formula.ols(formula='price ~ area', data=dataframe2)
-res = model.fit()
-dataframe2.assign(fit=res.fittedvalues).plot(x='area', y='fit', ax=ax, label='fit Челябинск')
-
-model = sm.formula.ols(formula='price ~ area', data=dataframe)
-res = model.fit()
-dataframe.assign(fit=res.fittedvalues).plot(x='area', y='fit', ax=ax, label='fit Копейск')
+add_trend_by_x(ax=ax, df=dataframe3, x='area', y='price', label='fit Екатеринбург')
+add_trend_by_x(ax=ax, df=dataframe2, x='area', y='price', label='fit Челябинск')
+add_trend_by_x(ax=ax, df=dataframe, x='area', y='price', label='fit Копейск')
 
 dataframe3.plot(ax=ax, x='area', y='price', kind='scatter', color='red', label='Екатеринбург')
 dataframe2.plot(ax=ax, x='area', y='price', kind='scatter', color='green', label='Челябинск')
