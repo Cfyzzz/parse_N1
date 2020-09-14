@@ -84,7 +84,7 @@ def parse_page(url):
                 continue
 
             row = Apartments(
-                city=city.text,
+                city=city.text.replace(",", "").strip(),
                 district=district.text,
                 addr=addr,
                 area=area,
@@ -103,7 +103,7 @@ def parse_page(url):
     return False
 
 
-base_url = "https://kopeysk.n1.ru/kupit/kvartiry/"
+base_url = "https://kazan.n1.ru/kupit/kvartiry/"
 is_page = True
 param = ""
 index_page = 1
