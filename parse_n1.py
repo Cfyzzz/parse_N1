@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import re
 
 from models import Apartments
+from utils import strim_all
 
 
 class NoneObject:
@@ -84,13 +85,13 @@ def parse_page(url):
                 continue
 
             row = Apartments(
-                city=city.text.replace(",", "").strip(),
+                city=strim_all(city.text),
                 district=district.text,
                 addr=addr,
                 area=area,
                 floor=floor,
                 number_of_floors=floors,
-                material=material.text,
+                material=strim_all(material.text),
                 price=price,
                 sqm=sqm,
                 rooms=rooms
