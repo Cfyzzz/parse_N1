@@ -13,16 +13,16 @@ def add_trend_by_x(ax, df, x, y, label="fit"):
 
 
 set_price = 10000000
-set_area = 250
+set_area = 500
 
 database_connection = create_engine('sqlite:///realty.sqlite3')
 # dataframe = pd.read_sql_query(f'SELECT price, area, rooms, sqm FROM apartments WHERE city like "Копе%" AND price <= {set_price} AND area <= {set_area}', database_connection)
 # dataframe2 = pd.read_sql_query(f'SELECT price, area, rooms, sqm FROM apartments WHERE city like "Челябинск%" AND price <= {set_price} AND area <= {set_area}', database_connection)
-dataframe3 = pd.read_sql_query(f'SELECT price, area, rooms, sqm, material FROM apartments WHERE city like "Екатеринбург%" AND price <= {set_price} AND area <= {set_area}', database_connection)
+dataframe3 = pd.read_sql_query(f'SELECT price, area, rooms, sqm, material, substr(district,1,instr(district, " ")) as district FROM apartments WHERE city like "Челябинск%" AND price <= {set_price} AND area <= {set_area}', database_connection)
 # dataframe4 = pd.read_sql_query(f'SELECT price, area, rooms, sqm FROM apartments WHERE city like "Казань%" AND price <= {set_price} AND area <= {set_area}', database_connection)
 # print(dataframe.head(5))
 
-dataframes = dataframe3.groupby('material')
+dataframes = dataframe3.groupby('district')
 
 fig, ax = pyplot.subplots()
 
@@ -31,14 +31,23 @@ fig, ax = pyplot.subplots()
 # add_trend_by_x(ax=ax, df=dataframe, x='area', y='price', label='fit Копейск')
 # add_trend_by_x(ax=ax, df=dataframe4, x='area', y='price', label='fit Казань')
 
-number_of_colors = 12
-def random_color():
-    color = list(map(lambda x: x/255, list(random.choices(range(256), k=3))))
-    print(color)
-    return color
 
+def random_color():
+    color = [0.1, 0.2, 0.3]
+    while True:
+        color = [color[1], color[2], random.uniform(0, 1)]
+        print(color)
+        yield color
+
+
+color = random_color()
 for idx, df in enumerate(dataframes):
-    df[1].plot(ax=ax, x='area', y='price', kind='scatter', color=random_color(), label=df[0])
+    if len(df[0]) < 5:
+        continue
+
+    # df[1].plot(ax=ax, x='area', y='price', kind='scatter', color=next(color), label=df[0])
+    add_trend_by_x(ax=ax, df=df[1], x='area', y='price', label=df[0])
+
 # dataframe2.plot(ax=ax, x='area', y='price', kind='scatter', color='green', label='Челябинск')
 # dataframe.plot(ax=ax, x='area', y='price', kind='scatter', color='blue', label='Копейск')
 # dataframe4.plot(ax=ax, x='area', y='price', kind='scatter', color='yellow', label='Казань')

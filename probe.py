@@ -19,10 +19,27 @@
 #     group.plot(ax=ax, kind='scatter', x='x', y='y', label=key, color=colors[key])
 # pyplot.savefig('demo.png', bbox_inches='tight')
 
-from models import Apartments
-from utils import strim_all
+import pandas as pd
+from sqlalchemy import create_engine
+from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
 
 
 
+
+database_connection = create_engine('sqlite:///realty.sqlite3')
+dataframe = pd.read_sql_query('SELECT price, area, rooms, sqm FROM apartments WHERE city like "Копейск%"', database_connection)
+print(dataframe.head(5))
+
+clusterer = KMeans(8, random_state=0)
+clusterer.fit(dataframe)
+
+dataframe['cluster'] = clusterer.predict(dataframe)
+
+ax = dataframe.plot(x='price', y='cluster', kind='scatter')
+fig = ax.get_figure()
+
+
+fig.savefig('demo2.png', bbox_inches='tight')
 
 
